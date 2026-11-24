@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <rect width="800" height="600" fill="#F1F5F9"/>
+  <rect x="40" y="40" width="720" height="520" rx="24" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <!-- Medical Dressing Box -->
+  <rect x="180" y="140" width="440" height="320" rx="20" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="3"/>
+  <rect x="180" y="140" width="440" height="76" rx="20" fill="#0F766E"/>
+  <text x="220" y="187" fill="#FFFFFF" font-family="sans-serif" font-size="24" font-weight="700">STERISHIELD CARE</text>
+  <rect x="500" y="162" width="84" height="32" rx="8" fill="#115E59"/>
+  <text x="516" y="183" fill="#CCFBF1" font-family="monospace" font-size="15" font-weight="700">10x10 CM</text>
+  <!-- Hydrocolloid Pad Graphic -->
+  <rect x="220" y="250" width="160" height="160" rx="24" fill="#FEF3C7" stroke="#F59E0B" stroke-width="3" stroke-dasharray="8 6"/>
+  <rect x="248" y="278" width="104" height="104" rx="16" fill="#FDE68A"/>
+  <path d="M300 306V354M276 330H324" stroke="#B45309" stroke-width="6" stroke-linecap="round"/>
+  <!-- Details Text -->
+  <text x="415" y="285" fill="#0F172A" font-family="sans-serif" font-size="24" font-weight="700">Hydrocolloid</text>
+  <text x="415" y="315" fill="#0F172A" font-family="sans-serif" font-size="24" font-weight="700">Sterile Dressings</text>
+  <text x="415" y="350" fill="#475569" font-family="sans-serif" font-size="16" font-weight="500">Waterproof Barrier</text>
+  <text x="415" y="376" fill="#475569" font-family="sans-serif" font-size="16" font-weight="500">Exudate Lock Matrix</text>
+  <rect x="415" y="396" width="150" height="32" rx="6" fill="#F0FDFA" stroke="#99F6E4" stroke-width="2"/>
+  <text x="430" y="417" fill="#0F766E" font-family="sans-serif" font-size="14" font-weight="700">STERILE EO · 10 PCS</text>
+</svg>

@@ -1,0 +1,156 @@
+{
+  "entities": {
+    "Brand": {
+      "title": "Brand",
+      "description": "Medical product brand or manufacturer in the National Care Group catalog.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the medical brand.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-safe identifier slug.",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief overview of the brand.",
+          "minLength": 0,
+          "maxLength": 500
+        }
+      },
+      "required": ["name", "slug", "description"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Medical product category in the National Care Group catalog.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the medical category.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-safe identifier slug.",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief overview of the category.",
+          "minLength": 0,
+          "maxLength": 500
+        }
+      },
+      "required": ["name", "slug", "description"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Medical product with associated brand and category.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Product name.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "sku": {
+          "type": "string",
+          "description": "Product stock keeping unit code.",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed medical product specifications and usage description.",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Product image URL or path.",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "brandId": {
+          "type": "string",
+          "description": "Reference ID of the associated Brand.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference ID of the associated Category.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        }
+      },
+      "required": ["name", "sku", "description", "imageUrl", "brandId", "categoryId"]
+    },
+    "PricingTier": {
+      "title": "PricingTier",
+      "description": "Independent multi-tier pricing offer (bundle) with its own units per bundle and total bundle price in KWD.",
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string",
+          "description": "Reference ID of the parent Product.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "label": {
+          "type": "string",
+          "description": "Display label of the bundle offer (e.g. '1 pack', '4 packs', '12 packs').",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "unitsPerBundle": {
+          "type": "number",
+          "description": "Positive integer number of individual packs/units included in one bundle."
+        },
+        "bundlePrice": {
+          "type": "number",
+          "description": "Total price in KWD for one bundle of this tier."
+        },
+        "sortOrder": {
+          "type": "number",
+          "description": "Display ordering index for the tier."
+        }
+      },
+      "required": ["productId", "label", "unitsPerBundle", "bundlePrice", "sortOrder"]
+    }
+  },
+  "firestore": {
+    "/brands/{brandId}": {
+      "schema": { "$ref": "#/entities/Brand" },
+      "description": "Medical product brands."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Medical product categories."
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Medical products in the catalog."
+    },
+    "/pricingTiers/{tierId}": {
+      "schema": { "$ref": "#/entities/PricingTier" },
+      "description": "Independent multi-tier bundle pricing offers linked to products."
+    }
+  }
+}

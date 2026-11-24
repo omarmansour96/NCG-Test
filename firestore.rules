@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1 & Phase 4.1: Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitive Definitions
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Pillar 2: Validation Blueprints (Anti-Update-Gap)
+    function isValidBrand(data) {
+      return data.keys().hasAll(['name', 'slug', 'description']) &&
+             data.keys().hasOnly(['name', 'slug', 'description']) &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.slug is string && data.slug.size() >= 1 && data.slug.size() <= 100 && data.slug.matches('^[a-zA-Z0-9_\\-]+$') &&
+             data.description is string && data.description.size() <= 500;
+    }
+
+    function isValidCategory(data) {
+      return data.keys().hasAll(['name', 'slug', 'description']) &&
+             data.keys().hasOnly(['name', 'slug', 'description']) &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.slug is string && data.slug.size() >= 1 && data.slug.size() <= 100 && data.slug.matches('^[a-zA-Z0-9_\\-]+$') &&
+             data.description is string && data.description.size() <= 500;
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['name', 'sku', 'description', 'imageUrl', 'brandId', 'categoryId']) &&
+             data.keys().hasOnly(['name', 'sku', 'description', 'imageUrl', 'brandId', 'categoryId']) &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 160 &&
+             data.sku is string && data.sku.size() >= 1 && data.sku.size() <= 64 && data.sku.matches('^[a-zA-Z0-9_\\-]+$') &&
+             data.description is string && data.description.size() >= 1 && data.description.size() <= 2000 &&
+             data.imageUrl is string && data.imageUrl.size() >= 1 && data.imageUrl.size() <= 1000 &&
+             isValidId(data.brandId) &&
+             isValidId(data.categoryId);
+    }
+
+    function isValidPricingTier(data) {
+      return data.keys().hasAll(['productId', 'label', 'unitsPerBundle', 'bundlePrice', 'sortOrder']) &&
+             data.keys().hasOnly(['productId', 'label', 'unitsPerBundle', 'bundlePrice', 'sortOrder']) &&
+             isValidId(data.productId) &&
+             data.label is string && data.label.size() >= 1 && data.label.size() <= 100 &&
+             data.unitsPerBundle is int && data.unitsPerBundle >= 1 && data.unitsPerBundle <= 10000 &&
+             data.bundlePrice is number && data.bundlePrice > 0 && data.bundlePrice <= 1000000 &&
+             data.sortOrder is int && data.sortOrder >= 0 && data.sortOrder <= 1000;
+    }
+
+    // Connection validation probe path
+    match /test/{docId} {
+      allow get: if isValidId(docId);
+    }
+
+    // Brands Collection
+    match /brands/{brandId} {
+      allow get: if isValidId(brandId);
+      allow list: if true;
+      allow create: if isValidId(brandId) && isValidBrand(incoming());
+      allow update: if isValidId(brandId) && isValidBrand(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'slug', 'description'])
+      );
+      allow delete: if isValidId(brandId);
+    }
+
+    // Categories Collection
+    match /categories/{categoryId} {
+      allow get: if isValidId(categoryId);
+      allow list: if true;
+      allow create: if isValidId(categoryId) && isValidCategory(incoming());
+      allow update: if isValidId(categoryId) && isValidCategory(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'slug', 'description'])
+      );
+      allow delete: if isValidId(categoryId);
+    }
+
+    // Products Collection (Master Gate checks Brand & Category existence)
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if true;
+      allow create: if isValidId(productId) && isValidProduct(incoming()) &&
+                    exists(/databases/$(database)/documents/brands/$(incoming().brandId)) &&
+                    exists(/databases/$(database)/documents/categories/$(incoming().categoryId));
+      allow update: if isValidId(productId) && isValidProduct(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'sku', 'description', 'imageUrl', 'brandId', 'categoryId']) &&
+        exists(/databases/$(database)/documents/brands/$(incoming().brandId)) &&
+        exists(/databases/$(database)/documents/categories/$(incoming().categoryId))
+      );
+      allow delete: if isValidId(productId);
+    }
+
+    // Pricing Tiers Collection (Master Gate checks parent Product existence & immutability of productId)
+    match /pricingTiers/{tierId} {
+      allow get: if isValidId(tierId);
+      allow list: if true;
+      allow create: if isValidId(tierId) && isValidPricingTier(incoming()) &&
+                    exists(/databases/$(database)/documents/products/$(incoming().productId));
+      allow update: if isValidId(tierId) && isValidPricingTier(incoming()) && (
+        incoming().productId == existing().productId &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['label', 'unitsPerBundle', 'bundlePrice', 'sortOrder']) &&
+        exists(/databases/$(database)/documents/products/$(incoming().productId))
+      );
+      allow delete: if isValidId(tierId);
+    }
+  }
+}
